@@ -79,10 +79,19 @@ uv sync --all-extras
 # Install PyInstaller
 uv pip install pyinstaller
 
-# Create entry script (resolves relative import issues)
+# Create entry script (resolves relative import issues + SSL certs for PyInstaller)
 cat > entry_point.py << 'EOF'
 #!/usr/bin/env python
 """Entry point for PyInstaller - uses absolute imports"""
+import sys
+import os
+
+# Fix SSL certificates when running as PyInstaller bundle (required for aiohttp HTTPS)
+if getattr(sys, 'frozen', False):
+    import certifi
+    os.environ['SSL_CERT_FILE'] = certifi.where()
+    os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+
 from castrel_proxy.cli.commands import run
 if __name__ == "__main__":
     run()
@@ -100,8 +109,10 @@ uv run pyinstaller \
   --hidden-import mcp \
   --hidden-import langchain_mcp_adapters \
   --hidden-import file_read_backwards \
-  --console \
+  --hidden-import certifi \
   --collect-all castrel_proxy \
+  --collect-data certifi \
+  --console \
   entry_point.py
 
 # Binary files will be in dist/ directory
@@ -114,6 +125,7 @@ If the build fails, check:
 1. **Dependency issues**: Ensure all dependencies are correctly installed
 2. **Hidden imports**: If you encounter `ModuleNotFoundError` at runtime, you may need to add `--hidden-import`
 3. **Resource files**: Ensure using `importlib.resources` to access package data files (already fixed)
+4. **SSL/HTTPS connections**: If "Unable to connect to server" occurs with PyInstaller binary but works with pip install, ensure certifi is bundled and SSL_CERT_FILE is set at startup (already fixed in entry script)
 
 ### Notes
 
