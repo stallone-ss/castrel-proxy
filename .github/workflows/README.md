@@ -129,6 +129,7 @@ If the build fails, check:
 
 ### Notes
 
+- **Linux x86_64** is built in `python:3.11-bullseye` container (GLIBC 2.31, runs on Ubuntu 20.04+)
 - Building takes some time
 - Make sure to update the version number in `pyproject.toml` before pushing a tag
 - Release will automatically extract version number from tag name (removing `v` prefix)
