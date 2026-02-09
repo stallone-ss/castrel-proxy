@@ -13,26 +13,25 @@ on:
 
 jobs:
   build-linux-x86_64:
-    name: Build Linux x86_64 (CentOS 7+ / glibc 2.17)
+    name: Build Linux x86_64 (Ubuntu 20.04+ / glibc 2.31)
     runs-on: ubuntu-latest
     container:
-      image: quay.io/pypa/manylinux2014_x86_64
+      image: python:3.11-bullseye
     defaults:
       run:
         shell: bash
 
-    env:
-      PATH: /opt/python/cp311-cp311/bin:/usr/bin:/bin:$PATH
-
     steps:
       - name: Install git
-        run: yum install -y git
+        run: apt-get update && apt-get install -y git
 
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install uv
-        run: /opt/python/cp311-cp311/bin/pip install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
       - name: Install dependencies
         run: uv sync --all-extras
@@ -91,26 +90,25 @@ jobs:
           retention-days: 30
 
   build-linux-arm64:
-    name: Build Linux ARM64 (CentOS 7+ / glibc 2.17)
+    name: Build Linux ARM64 (Ubuntu 20.04+ / glibc 2.31)
     runs-on: ubuntu-24.04-arm
     container:
-      image: quay.io/pypa/manylinux2014_aarch64
+      image: python:3.11-bullseye
     defaults:
       run:
         shell: bash
 
-    env:
-      PATH: /opt/python/cp311-cp311/bin:/usr/bin:/bin:$PATH
-
     steps:
       - name: Install git
-        run: yum install -y git
+        run: apt-get update && apt-get install -y git
 
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install uv
-        run: /opt/python/cp311-cp311/bin/pip install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
       - name: Install dependencies
         run: uv sync --all-extras
@@ -320,8 +318,8 @@ jobs:
 
             ### Downloads
 
-            - **Linux x86_64** (CentOS 7+, Ubuntu 13.10+): `castrel-proxy-linux-x86_64`
-            - **Linux ARM64** (CentOS 7+, Ubuntu 13.10+): `castrel-proxy-linux-arm64`
+            - **Linux x86_64** (Ubuntu 20.04+): `castrel-proxy-linux-x86_64`
+            - **Linux ARM64** (Ubuntu 20.04+): `castrel-proxy-linux-arm64`
             - **macOS ARM64 (Apple Silicon)**: `castrel-proxy-macos-arm64`
             - **macOS x86_64 (Intel)**: `castrel-proxy-macos-x86_64`
 

@@ -129,7 +129,7 @@ If the build fails, check:
 
 ### Notes
 
-- **Linux x86_64** and **Linux ARM64** are built in `quay.io/pypa/manylinux2014_*` containers (CentOS 7 based, GLIBC 2.17, runs on CentOS 7+, Ubuntu 13.10+)
+- **Linux x86_64** and **Linux ARM64** are built in `python:3.11-bullseye` container (Debian 11, GLIBC 2.31, runs on Ubuntu 20.04+)
 - Building takes some time
 - Make sure to update the version number in `pyproject.toml` before pushing a tag
 - Release will automatically extract version number from tag name (removing `v` prefix)
