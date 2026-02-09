@@ -19,10 +19,10 @@ jobs:
       image: quay.io/pypa/manylinux2014_x86_64
     defaults:
       run:
-        shell: /bin/bash
+        shell: bash
 
     env:
-      PATH: /opt/python/cp311-cp311/bin:$PATH
+      PATH: /opt/python/cp311-cp311/bin:/usr/bin:/bin:$PATH
 
     steps:
       - name: Install git
@@ -97,10 +97,10 @@ jobs:
       image: quay.io/pypa/manylinux2014_aarch64
     defaults:
       run:
-        shell: /bin/bash
+        shell: bash
 
     env:
-      PATH: /opt/python/cp311-cp311/bin:$PATH
+      PATH: /opt/python/cp311-cp311/bin:/usr/bin:/bin:$PATH
 
     steps:
       - name: Install git
