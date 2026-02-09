@@ -18,17 +18,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
             artifact_name: castrel-proxy-linux-x86_64
             binary_name: castrel-proxy
+          - os: ubuntu-24.04-arm
+            artifact_name: castrel-proxy-linux-arm64
+            binary_name: castrel-proxy
           - os: macos-latest
+            artifact_name: castrel-proxy-macos-arm64
+            binary_name: castrel-proxy
+          - os: macos-13
             artifact_name: castrel-proxy-macos-x86_64
             binary_name: castrel-proxy
-          - os: windows-latest
-            artifact_name: castrel-proxy-windows-x86_64
-            binary_name: castrel-proxy.exe
 
     steps:
       - name: Checkout code
@@ -52,8 +54,7 @@ jobs:
         run: |
           uv pip install pyinstaller
 
-      - name: Create entry script (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Create entry script
         run: |
           cat > entry_point.py << 'EOF'
           #!/usr/bin/env python
@@ -63,14 +64,7 @@ jobs:
               run()
           EOF
 
-      - name: Create entry script (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          python -c "with open('entry_point.py', 'w', encoding='utf-8') as f: f.write('''#!/usr/bin/env python\n\"\"\"Entry point for PyInstaller - uses absolute imports\"\"\"\nfrom castrel_proxy.cli.commands import run\nif __name__ == \"__main__\":\n    run()\n''')"
-
-      - name: Build with PyInstaller (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Build with PyInstaller
         run: |
           uv run pyinstaller \
             --onefile \
@@ -87,24 +81,11 @@ jobs:
             --collect-all castrel_proxy \
             entry_point.py
 
-      - name: Build with PyInstaller (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          uv run pyinstaller --onefile --name ${{ matrix.binary_name }} --paths src --hidden-import castrel_proxy.data --hidden-import castrel_proxy.cli.commands --hidden-import typer --hidden-import aiohttp --hidden-import mcp --hidden-import langchain_mcp_adapters --hidden-import file_read_backwards --console --collect-all castrel_proxy entry_point.py
-
-      - name: Test binary (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Test binary
         shell: bash
         run: |
           chmod +x ./dist/${{ matrix.binary_name }}
           ./dist/${{ matrix.binary_name }} --help
-
-      - name: Test binary (Windows)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          dist\${{ matrix.binary_name }} --help
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -150,21 +131,17 @@ jobs:
               platform_name=$(basename "$artifact_dir")
               
               # Find binary file
-              binary_file=$(find "$artifact_dir" -type f \( -name "castrel-proxy" -o -name "castrel-proxy.exe" \) | head -1)
+              binary_file=$(find "$artifact_dir" -type f -name "castrel-proxy" | head -1)
               
               if [ -n "$binary_file" ] && [ -f "$binary_file" ]; then
-                # Determine output filename (add .exe for Windows)
-                if [[ "$platform_name" == *"windows"* ]]; then
-                  output_name="${platform_name}.exe"
-                else
-                  output_name="${platform_name}"
-                fi
+                output_name="${platform_name}"
                 
                 # Create checksum
                 shasum -a 256 "$binary_file" > "${binary_file}.sha256"
                 
-                # Copy to release directory
+                # Copy to release directory and ensure executable permission
                 cp "$binary_file" "release/${output_name}"
+                chmod +x "release/${output_name}"
                 cp "${binary_file}.sha256" "release/${output_name}.sha256"
               fi
             fi
@@ -182,31 +159,25 @@ jobs:
 
             ### Downloads
 
-            - **Linux**: `castrel-proxy-linux-x86_64`
-            - **macOS**: `castrel-proxy-macos-x86_64`
-            - **Windows**: `castrel-proxy-windows-x86_64.exe`
+            - **Linux x86_64**: `castrel-proxy-linux-x86_64`
+            - **Linux ARM64**: `castrel-proxy-linux-arm64`
+            - **macOS ARM64 (Apple Silicon)**: `castrel-proxy-macos-arm64`
+            - **macOS x86_64 (Intel)**: `castrel-proxy-macos-x86_64`
 
             ### Installation
 
             **macOS/Linux:**
             ```bash
-            # Download the binary
+            # Download the binary for your platform
             # Add execute permission (if needed)
-            chmod +x castrel-proxy-macos-x86_64  # or castrel-proxy-linux-x86_64
+            chmod +x castrel-proxy-<platform>
             
             # Option 1: Run directly from current directory
-            ./castrel-proxy-macos-x86_64 start
+            ./castrel-proxy-<platform> start
             
             # Option 2: Move to a directory in your PATH (recommended)
-            sudo mv castrel-proxy-macos-x86_64 /usr/local/bin/castrel-proxy
+            sudo mv castrel-proxy-<platform> /usr/local/bin/castrel-proxy
             castrel-proxy start
-            ```
-
-            **Windows:**
-            ```cmd
-            # Download the .exe file
-            # Run directly
-            castrel-proxy-windows-x86_64.exe start
             ```
 
             ### Checksums

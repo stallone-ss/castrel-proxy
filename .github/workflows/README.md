@@ -22,7 +22,7 @@ Used for continuous integration testing, automatically runs on every push to mai
 Used for building PyInstaller binaries, supports multi-platform builds.
 
 **Features:**
-- Build single executable files on Linux, macOS, Windows
+- Build single executable files on Linux (x86_64, ARM64) and macOS (x86_64, ARM64)
 - Automatically test built binaries
 - Create GitHub Release (when pushing tags)
 - Generate SHA256 checksums
@@ -42,7 +42,7 @@ Used for building PyInstaller binaries, supports multi-platform builds.
    ```
 
 2. **GitHub Actions will automatically:**
-   - Build binaries on three platforms
+   - Build binaries on four platforms (Linux x86_64, Linux ARM64, macOS ARM64, macOS x86_64)
    - Test each binary
    - Create GitHub Release
    - Upload all binaries and checksums
@@ -63,9 +63,10 @@ After building, you can find binaries in the following locations:
 
 ### Binary File Naming
 
-- Linux: `castrel-proxy-linux-x86_64`
-- macOS: `castrel-proxy-macos-x86_64`
-- Windows: `castrel-proxy-windows-x86_64.exe`
+- Linux x86_64: `castrel-proxy-linux-x86_64`
+- Linux ARM64: `castrel-proxy-linux-arm64`
+- macOS ARM64 (Apple Silicon): `castrel-proxy-macos-arm64`
+- macOS x86_64 (Intel): `castrel-proxy-macos-x86_64`
 
 ### Local Build
 
@@ -116,6 +117,6 @@ If the build fails, check:
 
 ### Notes
 
-- Building takes some time, especially on Windows
+- Building takes some time
 - Make sure to update the version number in `pyproject.toml` before pushing a tag
 - Release will automatically extract version number from tag name (removing `v` prefix)
