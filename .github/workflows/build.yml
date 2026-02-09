@@ -19,7 +19,7 @@ jobs:
       image: quay.io/pypa/manylinux2014_x86_64
     defaults:
       run:
-        shell: bash
+        shell: /bin/bash
 
     env:
       PATH: /opt/python/cp311-cp311/bin:$PATH
@@ -97,7 +97,7 @@ jobs:
       image: quay.io/pypa/manylinux2014_aarch64
     defaults:
       run:
-        shell: bash
+        shell: /bin/bash
 
     env:
       PATH: /opt/python/cp311-cp311/bin:$PATH
